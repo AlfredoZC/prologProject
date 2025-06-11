@@ -1,7 +1,6 @@
-%ruta busca la ruta entre dos estados de EE.UU. y su distancia.
-ruta(Origen, Destino, Distancia) :-ruta_directa(Origen, Destino, Distancia).
-ruta(Origen, Destino, Distancia) :- ruta_inversa(Origen, Destino, Distancia).
-ruta_inversa(Origen, Destino, Distancia) :- ruta_directa(Destino, Origen, Distancia).
+% Rutas base
+ruta(Origen, Destino, Distancia) :- ruta_directa(Origen, Destino, Distancia).
+ruta(Origen, Destino, Distancia) :- ruta_directa(Destino, Origen, Distancia).
 
 ruta_directa(california, nevada, 120).
 ruta_directa(california, arizona, 140).
@@ -27,27 +26,28 @@ ruta_directa(north_carolina, virginia, 70).
 ruta_directa(virginia, maryland, 60).
 ruta_directa(maryland, delaware, 40).
 ruta_directa(delaware, new_jersey, 50).
+ruta_directa(california, utah, 300).     
+ruta_directa(nevada, arizona, 180).  
 
+% Búsqueda de caminos
 camino(Origen, Destino, DistanciaTotal, ListaLugares):-
     camino_(Origen, Destino, DistanciaTotal, [Origen], ListaLugares).
 
-% regla auxiliar 'camino_' que se encarga de hacer el 'trabajo sucio' para hallar caminos
-% caso base: cuando camino_ es sencillo, osea una ruta de 'A' hacia 'B'
 camino_(Origen, Destino, DistanciaTotal, BorradorVisitados, [Origen, Destino]):-
     ruta(Origen, Destino, DistanciaTotal),
     not(member(Destino, BorradorVisitados)).
 
-% caso contrario, debemos buscar un lugar intermedio por donde se puede ir
-% hacia el destino final.
 camino_(Origen, Destino, DistanciaTotal, BorradorVisitados, [Origen | ListaLugares]):-
     ruta(Origen, LugarIntermedio, DistanciaIntermedia),
     LugarIntermedio \= Destino,
-    not(member(LugarIntermedio, BorradorVisitados)), % evita repetir lugares visitados
+    not(member(LugarIntermedio, BorradorVisitados)),
     camino_(LugarIntermedio, Destino, DistanciaIntermedia2, [LugarIntermedio | BorradorVisitados], ListaLugares),
     DistanciaTotal is DistanciaIntermedia + DistanciaIntermedia2.
 
+% Mejor camino
 mejor_camino(Origen, Destino, DistanciaTotal, ListaLugares):-
     findall((Distancia, Lugares), camino(Origen, Destino, Distancia, Lugares), Caminos),
     sort(Caminos, CaminosOrdenados),
     CaminosOrdenados = [(DistanciaTotal, ListaLugares) | _].
 
+ 
